@@ -1,0 +1,12 @@
+//if not logged in, ask for login info
+
+//once logged in:
+//check for playlist named SpotifyBPM
+    //if it exists, use that as BPM-playlist
+    //if not,create one and use as BPM-playlist
+//check for playlist named BPMWorkout
+    //if it exists, use as workout-playlist
+    //if not, create one and use as workout-playlist
+
+//BPM-playlist is where the user will put songs to choose from. The app will search here for songs with similar BPMs to what the user requests in any given search.
+//workout-playlist is where the user can add songs for the current workout
