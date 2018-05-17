@@ -1,28 +1,33 @@
+:root {
+  background-color: #72b76c;
+
+}
+
+html {
+  margin: 0;
+  padding: 0;
+}
+
 .App {
+
+}
+
+h1 {
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
+.header {
+  text-align: center;
   color: white;
+  margin: 0 40px;
 }
 
-.App-title {
-  font-size: 1.5em;
+.bpm-search {
+  text-align: center;
+
 }
 
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+input {
+  margin-left: 40px;
+  margin-top: 30px;
 }
