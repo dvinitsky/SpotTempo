@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './SearchItem.css';
 
 
 export class SearchItem extends Component {
@@ -9,14 +8,12 @@ export class SearchItem extends Component {
     
     }
 
-
     handleSongClick(){
         this.props.addSong(this.props.song);
 
     }
 
     render() {
-
         return(
             <div onClick={this.handleSongClick} className="searchItem">
                 <div>+</div>

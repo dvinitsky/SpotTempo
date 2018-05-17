@@ -6,6 +6,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.handleSearch = this.handleSearch.bind(this);
+    this.addSong = this.addSong.bind(this);
+
     this.state = {
       bpmPlaylist: [
         {id: 0,
@@ -52,8 +54,6 @@ class App extends Component {
 
 
   handleSearch(e){
-
-    
     let searchbpm = parseInt(e.target.value);
 
     let matchingSongs = this.state.bpmPlaylist.filter(x => {
@@ -63,11 +63,9 @@ class App extends Component {
   }
 
   addSong(song){
-
+    console.log('adding ' + song.title);
 
   }
-
-
 
 
   render() {
@@ -78,7 +76,7 @@ class App extends Component {
 
         <input placeholder="Search by BPM" onChange={this.handleSearch}></input>
 
-        <SearchResults searchResults={this.state.searchResults} />
+        <SearchResults searchResults={this.state.searchResults} addSong = {this.addSong}/>
 
       </div>
     );
