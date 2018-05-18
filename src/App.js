@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import {SearchResults} from './Components/SearchResults';
 import {Playlist} from './Components/Playlist';
+import LoginArea from './Components/LoginArea';
 
 class App extends Component {
   constructor(props) {
@@ -84,7 +85,7 @@ class App extends Component {
     return (
       <div className="App">
         <h1 className="title">Spotify BPM Picker</h1>
-        <div className="header">This app will allow you to search for songs by BPM in your "SpotifyBPM" playlist, and add them to your BPMWorkout playlist.</div>
+        <div className="header">This app will allow you to search for songs by BPM in your "SpotifyBPM" playlist, and add them to your "BPMWorkout" playlist.</div>
 
         <input className ="searchBar" placeholder="Search by BPM" onChange={this.handleSearch}></input>
 
@@ -97,6 +98,8 @@ class App extends Component {
           <div className='playlistHeader'>Playlist</div>
           <Playlist playlist={this.state.playlist} removeSong={this.removeSong}/>
         </div>
+
+        <LoginArea />
 
       </div>
     );

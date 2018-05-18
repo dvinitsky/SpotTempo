@@ -23,7 +23,7 @@ export class SearchItem extends Component {
             <div onClick={this.handleSongClick} className="searchItem">
                 <div>+</div>
 
-                <div className="songInfo">{this.props.song.title} by {this.props.song.artist} ({this.props.song.bpm} BPM)</div>
+                <div className="songInfo"><strong>{this.props.song.title} by {this.props.song.artist} ({this.props.song.bpm} BPM)</strong></div>
 
             </div>
         );
