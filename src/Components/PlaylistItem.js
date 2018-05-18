@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 
-export class SearchItem extends Component {
+export class PlaylistItem extends Component {
     constructor(props){
         super(props);
         this.handleSongClick = this.handleSongClick.bind(this);
@@ -9,19 +9,14 @@ export class SearchItem extends Component {
     }
 
     handleSongClick(){
-        this.props.addSong(this.props.song);
-
-    }
-
-    componentDidMount(){
-
+        this.props.removeSong(this.props.song);
 
     }
 
     render() {
         return(
-            <div onClick={this.handleSongClick} className="searchItem">
-                <div>+</div>
+            <div onClick={this.handleSongClick} className="playlistItem">
+                <div>-</div>
 
                 <div className="songInfo">{this.props.song.title} by {this.props.song.artist} ({this.props.song.bpm} BPM)</div>
 
