@@ -13,6 +13,7 @@ const redirectUri = 'http://localhost:3000/';
 app.set('port', process.env.PORT || 5000);       //set port variable
 
 //allows front-end to request clientId and clientSecret
+
 app.use((req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*']);
   res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
@@ -21,22 +22,18 @@ app.use((req, res, next) => {
 });
 
 
-app.get('/clientId', (req, res) => {
-  console.log('Client id has been reached. About to send ' + clientId);
-  res.status(200).send(clientId);
-});
-
-app.get('/clientSecret', (req, res) => {
-  res.status(200).send(clientSecret);
-});
-
-app.get('/spotifylogin', (req, res) => {
-
+app.get('/login', (req, res) => {
   console.log('About to contact Spotify');
-  let url = 'https://accounts.spotify.com/authorize?client_id=200fe6a2e65643b4bada24a59cebc2cb&response_type=code&redirect_uri=http://localhost:3000/&scope=playlist-read-private%20playlist-modify-private&state=1777263456';
+  let url = 'https://accounts.spotify.com/authorize?client_id=' + clientId + '&response_type=code&redirect_uri=http://localhost:3000/&scope=playlist-read-private%20playlist-modify-private&state=1777263456';
 
-  let result = res.redirect(url);
-  res.status(200).send(result);
+  res.redirect(url);
+  
+  
+
+
+
+
+  //res.status(200).send(result);
   /*
   const newRequest = https.get(url, (response) => {
     let data = '';

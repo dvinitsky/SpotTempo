@@ -16,7 +16,7 @@ function randomState (length) {
 export function loginUser(){
   async function getCodes(){
     try{
-      let response = await fetch('http://localhost:8888/login');
+      let response = await fetch('http://localhost:5000/login');
       if (response.ok) {
         let textResponse = await response.text();
         return textResponse;
