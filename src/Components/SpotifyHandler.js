@@ -1,28 +1,22 @@
 let userId = '';
 let playlistId = '';
 
-const playlistURL = 'https://api.spotify.com/v1/users/' + userId + '/playlists/' + playlistId + '/tracks';
-
 const clientId = '200fe6a2e65643b4bada24a59cebc2cb';
-const clientSecret = 'c5082a4127ae4ae7b61dd87abe544784';
+//const clientSecret = 'c5082a4127ae4ae7b61dd87abe544784';
 const redirectUri = 'http://localhost:3000/';
 let accessToken;
 
 let getRequestURL = 'https://accounts.spotify.com/authorize?client_id=' + clientId + '&response_type=token&redirect_uri=' + redirectUri + '&scope=playlist-read-private%20playlist-modify-private&state=' + randomState(10);
 
 
-export function SpotifyHandler(){
+export async function SpotifyHandler(){
   function getAccessToken(){
-    console.log('accesstoken: ' + accessToken);
     if(typeof accessToken !== 'undefined'){
       return accessToken;
     }
     
     else if (      
       (window.location.href.match(/access_token=([^&]*)/) !== null) && (window.location.href.match(/expires_in=([^&]*)/) !== null)) {
-        console.log('in timeout');
-
-
       accessToken = window.location.href.split('access_token=')[1].split('&token_type')[0];
 
       let expirationTime = 3600;
@@ -30,106 +24,67 @@ export function SpotifyHandler(){
       //from Jammin instructions
       window.setTimeout(() => accessToken = '', expirationTime * 1000);
       window.history.pushState('Access Token', null, '/');
-      //
-
     }
     else{
-      console.log('in the else');
       window.location =  getRequestURL;
     }
+  }
 
+  function getPlaylist(){
     const headers = {
       'Authorization':  'Bearer ' + accessToken,
     };
 
     fetch('https://api.spotify.com/v1/me', {headers: headers}).then(response => {
-        if(response.ok){
-          return response.json();
-        } throw new Error('Request failed!');
-      }, networkError => console.log(networkError.message)).then(jsonResponse => {
-        return jsonResponse.id;
-      }).then(id => {
-        userId = id;
-        return 'https://api.spotify.com/	/v1/me/playlists';
-      }).then(urlString => {
-        fetch(urlString).then(response => {
-          if(response.ok){
-            return response.json();
-          } throw new Error('Request Failed.');
-        }, networkError => console.log(networkError.message)).then(jsonResponse => {
-          jsonResponse.forEach(playlist => {
-            if(playlist.name === 'SpotifyBPM'){
-              return playlist.id;
-            }
-          });
-        });    
-      
-      });
-  }
-  
-
-  
-  function getUserPlaylist(){
-  
-
-    
-  }
-    
-    /*
-    fetch(playlistURL, 
-    {headers: {
-      'Authorization': 'Bearer ' + accessToken
-    }}).then(response => {
       if(response.ok){
         return response.json();
-      }
-      throw new Error('Request failed!');
-      }, networkError => console.log(networkError.message)
-      ).then(jsonResponse => {
-        //do something with repsonse
-        console.log(jsonResponse);
+      } throw new Error('Request failed!');
+    }, networkError => console.log(networkError.message)).then(jsonResponse => {
+      return jsonResponse.id;
+    }).then(id => {
+      userId = id;
+      return 'https://api.spotify.com/v1/me/playlists';
+    }).then(urlString => {
+      fetch(urlString, {headers: headers}).then(response => {
+        if(response.ok){
+          return response.json();
+        } throw new Error('Request Failed.');
+      }, networkError => console.log(networkError.message)).then(jsonResponse => {
+        let playlistExists = false;          
+        jsonResponse.items.forEach(playlist => {
+          if(playlist.name === 'SpotifyBPM'){
+            console.log(playlist.name);
+            playlistId = playlist.id;
+            playlistExists = true;
+          }});
+          if(!playlistExists){
+            //create one!
+            fetch('https://api.spotify.com/v1/' + userId + '/playlists', {
+              headers: headers,
+              method: 'POST',
+              body: {
+                "name": "SpotifyBPM",
+                "public": "false"
+              }
+          }).then(response => {
+            if(response.ok){
+              console.log(response);
+              return response;
+            } throw new Error('Request Failed!');
+          }, networkError => console.log(networkError.message)).then(jsonResponse => {
+            console.log(jsonResponse);
+          });
 
+          }
+        });
+      });    
+  }
 
-    });
-    */
-  
-
-
-  getAccessToken();
-  
-  getUserPlaylist();
-
-  
+  await getAccessToken();
+  await getPlaylist();
 
 }
 
-  
-
-    /*.then(jsonResponse => {
-      console.log('auth code: ' + jsonResponse);
-      fetch(loginPostRequestURL, {
-        method: 'POST',
-        body: JSON.stringify({id: '200'}),
-        grant_type: 'authorization_code',
-        code: jsonResponse.code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret
-      }).then(response => {                  
-        if(response.ok) {
-          return response.json();                                                
-        }                                                                          
-        throw new Error('Request failed!');
-      }, networkError => console.log(networkError.message)
-      ).then(jsonResponse => {
-        console.log('made it!');
-      });
-      
-    });
-    
-}
-*/
-  
 
 
 function randomState (length) {
