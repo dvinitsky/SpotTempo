@@ -2,67 +2,68 @@ import React, { Component } from 'react';
 import './App.css';
 import {SearchResults} from './Components/SearchResults';
 import {Playlist} from './Components/Playlist';
-import LoginArea from './Components/LoginArea';
+import { SpotifyHandler } from './Components/SpotifyHandler';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.handleSearch = this.handleSearch.bind(this);
+    this.handleLogin = this.handleLogin.bind(this);
     this.addSong = this.addSong.bind(this);
     this.removeSong = this.removeSong.bind(this);
 
-    this.state = {
-      bpmPlaylist: [
-        {id: 0,
-        title: "Worldwide Choppers",
-        artist: "Tech Nine",
-        bpm: "150"},
-        {id: 1,
-        title: "Yellow",
-        artist: "Coldplay",
-        bpm: "87"},
-        {id: 2,
-        title: "Misery Loves Company",
-        artist: "Rittz",
-        bpm: "125"},
-        {id: 3,
-        title: "In My Zone",
-        artist: "Rittz",
-        bpm: "70"},
-        {id: 4,
-        title: "Just Dance",
-        artist: "Lady Gaga",
-        bpm: "155"},
-        {id: 5,
-        title: "Midwest Choppers",
-        artist: "Tech Nine",
-        bpm: "138"},
-        {id: 6,
-        title: "Bonfire",
-        artist: "Childish Gamino",
-        bpm: "120"},
-        {id: 7,
-        title: "This is America",
-        artist: "Childish Gambino",
-        bpm: "108"},
-        {id: 8,
-        title: "Stronger",
-        artist: "Kanye West",
-        bpm: "100"}
-      ],
+    this.state = {      
+      BPMplaylist: [],
       searchResults: [],
       playlist: []
     }
   }
 
-  handleSearch(e){
-    let searchbpm = parseInt(e.target.value, 10);
+  async handleLogin(){
+    await SpotifyHandler.setAccessToken();
 
-    let matchingSongs = this.state.bpmPlaylist.filter(x => {
-      return x.bpm > searchbpm - 10 && x.bpm < searchbpm + 10;
-    });    
+    let userId = await SpotifyHandler.getUserId();
+    this.setState({userId: userId});
+
+    let userPlaylists = await SpotifyHandler.getUserPlaylists();
+
+    let playlistId = SpotifyHandler.setSpotifyBPMPlaylistId(userPlaylists);
+    this.setState({spotifyBPMPlaylistId: playlistId});
+
+    if(this.state.spotifyBPMPlaylistId === ''){
+      await SpotifyHandler.createPlaylist(userId);
+    }
+
+    let BPMplaylist = await SpotifyHandler.getBPMTracks(this.state.userId, this.state.spotifyBPMPlaylistId);
+    this.setState({BPMplaylist: BPMplaylist})
+    console.log(this.state.BPMplaylist);
+  }
+
+  async handleSearch(e){
+    let searchbpm = parseInt(e.target.value, 10);
+    let matchingSongs = [];
+
+    for(let i = 0; i < this.state.BPMplaylist.length; i++){
+      let currentSong = this.state.BPMplaylist[i].track;
+      let songTempo = await SpotifyHandler.getTempo(currentSong.id);
+      console.log('Tempo for ' + currentSong.name + ' is ' + songTempo);
+
+
+      if(songTempo > searchbpm - 10 && songTempo < searchbpm + 10){
+        matchingSongs.push(currentSong);
+      }
+    }
+    /*
+    let matchingSongs = await this.state.BPMplaylist.filter(song => {
+      let songTempo = SpotifyHandler.getTempo(song.track.id);
+      console.log('Tempo for ' + song.track.name + ' is ' + songTempo);
+
+      return songTempo > searchbpm - 10 && songTempo < searchbpm + 10;
+    });
+    */    
     this.setState({searchResults: matchingSongs});    
   }
+
 
   addSong(song){
     this.state.playlist.push(song);
@@ -99,11 +100,23 @@ class App extends Component {
           <Playlist playlist={this.state.playlist} removeSong={this.removeSong}/>
         </div>
 
-        <LoginArea />
+        <LoginArea onclick={this.handleLogin} userId={this.state.userId} spotifyBPMPlaylistId={this.state.spotifyBPMPlaylistId} />
 
       </div>
     );
   }
 }
-
 export default App;
+
+
+
+//stateless component
+const LoginArea = (props) => {
+  return(
+    <div>
+      <button onClick={props.onclick} className='spotifyLogin'>Click here to log in with Spotify</button>
+      <div>User ID: {props.userId}</div>
+      <div>Playlist ID: {props.spotifyBPMPlaylistId}</div>
+    </div>
+  );
+}

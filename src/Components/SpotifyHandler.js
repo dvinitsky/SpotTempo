@@ -53,7 +53,7 @@ export const SpotifyHandler = {
     }
   },
 
-  getSpotifyBPMPlaylistId: function(userPlaylists) {
+  setSpotifyBPMPlaylistId: function(userPlaylists) {
     let id = '';
     //check if the playlist already exists
     userPlaylists.items.forEach(playlist => {
@@ -66,7 +66,6 @@ export const SpotifyHandler = {
   createPlaylist: async function(userId){
     //if we're still in the function, we need to create a playlist named Spotify BPM
     try{
-      console.log('creating playlist');
       let response = await fetch('https://api.spotify.com/v1/users/' + userId + '/playlists', {
         headers: {'Authorization':  'Bearer ' + accessToken,
                   'Content-Type': 'application/json'
@@ -84,7 +83,34 @@ export const SpotifyHandler = {
     } catch (error) {
       console.log(error);
     }
-  }     
+  },
+
+  getBPMTracks: async function(userId, spotifyBPMPlaylistId){
+    try{
+      let response = await fetch('https://api.spotify.com/v1/users/' + userId +'/playlists/' + spotifyBPMPlaylistId + '/tracks',
+        {headers: {'Authorization':  'Bearer ' + accessToken}});
+      if(response.ok){
+        let playlist = await response.json();
+        return playlist.items;
+      } throw new Error('Request failed!');
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  getTempo: async function(trackId){
+    try{
+      let response = await fetch('https://api.spotify.com/v1/audio-features/' + trackId,
+        {headers: {'Authorization':  'Bearer ' + accessToken}});
+      if(response.ok){
+        let songAudioInfo = await response.json();
+        return songAudioInfo.tempo;
+      } throw new Error('Request Failed!');
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
 }
 
 
