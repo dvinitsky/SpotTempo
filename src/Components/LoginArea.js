@@ -5,22 +5,38 @@ export class LoginArea extends Component {
   constructor(props){
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.state = {
+      userId: '',
+      playlistId: ''
+    }
   }
 
-  handleClick(e){
-    SpotifyHandler();
+  async handleClick(e){
+    await SpotifyHandler.setAccessToken();
 
-    /*
-    await getAccessToken();
-    let userId = await getUserId();
-    let userPlaylists = await getUserPlaylists();
-    await getSpotifyBPMPlaylistId(userPlaylists, userId);
-    */
+    let userId = await SpotifyHandler.getUserId();
+    this.setState({userId: userId});
+    let userPlaylists = await SpotifyHandler.getUserPlaylists();
+
+    let playlistId = SpotifyHandler.getSpotifyBPMPlaylistId(userPlaylists);
+    this.setState({playlistId: playlistId});
+
+    if(playlistId === ''){
+      playlistId = await SpotifyHandler.createPlaylist(this.state.userId);
+    }
+
+    this.setState({playlistId: playlistId});
+
+
   }
 
   render(){
     return(
-      <button onClick={this.handleClick} className='spotifyLogin'>Click here to log in with Spotify</button>
+      <div>
+        <button onClick={this.handleClick} className='spotifyLogin'>Click here to log in with Spotify</button>
+        <div>User ID: {this.state.userId}</div>
+        <div>Playlist ID: {this.state.playlistId}</div>
+      </div>
     );
   }
 
