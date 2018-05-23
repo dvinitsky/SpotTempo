@@ -31,9 +31,6 @@ html {margin: 0;padding: 0;}
   margin-bottom: 20px;
 }
 
-.searchResultsHeader{
-
-}
 
 .searchResultsContainer {
   grid-column: 4 / 6;

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {loginUser} from './SpotifyHandler';
+import {SpotifyHandler} from './SpotifyHandler';
 
 export class LoginArea extends Component {
   constructor(props){
@@ -8,7 +8,7 @@ export class LoginArea extends Component {
   }
 
   handleClick(e){
-    loginUser();
+    SpotifyHandler();
   }
 
   render(){

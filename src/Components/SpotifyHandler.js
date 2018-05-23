@@ -1,31 +1,109 @@
-const playlistURL = 'https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks';
-function randomState (length) {
-  var text = '';
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+let userId = '';
+let playlistId = '';
 
-  for (var i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  console.log(text);
-  return text;
-}
-//&state=" + randomState(10)
+const playlistURL = 'https://api.spotify.com/v1/users/' + userId + '/playlists/' + playlistId + '/tracks';
 
-////////////////////////////////////
+const clientId = '200fe6a2e65643b4bada24a59cebc2cb';
+const clientSecret = 'c5082a4127ae4ae7b61dd87abe544784';
+const redirectUri = 'http://localhost:3000/';
+let accessToken;
 
-export function loginUser(){
-  async function getCodes(){
-    try{
-      let response = await fetch('http://localhost:5000/login');
-      if (response.ok) {
-        let textResponse = await response.text();
-        return textResponse;
-      } throw new Error('Request Failed.');
-    } catch (error) {
-      console.log(error);
+let getRequestURL = 'https://accounts.spotify.com/authorize?client_id=' + clientId + '&response_type=token&redirect_uri=' + redirectUri + '&scope=playlist-read-private%20playlist-modify-private&state=' + randomState(10);
+
+
+export function SpotifyHandler(){
+  function getAccessToken(){
+    console.log('accesstoken: ' + accessToken);
+    if(typeof accessToken !== 'undefined'){
+      return accessToken;
     }
+    
+    else if (      
+      (window.location.href.match(/access_token=([^&]*)/) !== null) && (window.location.href.match(/expires_in=([^&]*)/) !== null)) {
+        console.log('in timeout');
+
+
+      accessToken = window.location.href.split('access_token=')[1].split('&token_type')[0];
+
+      let expirationTime = 3600;
+
+      //from Jammin instructions
+      window.setTimeout(() => accessToken = '', expirationTime * 1000);
+      window.history.pushState('Access Token', null, '/');
+      //
+
+    }
+    else{
+      console.log('in the else');
+      window.location =  getRequestURL;
+    }
+
+    const headers = {
+      'Authorization':  'Bearer ' + accessToken,
+    };
+
+    fetch('https://api.spotify.com/v1/me', {headers: headers}).then(response => {
+        if(response.ok){
+          return response.json();
+        } throw new Error('Request failed!');
+      }, networkError => console.log(networkError.message)).then(jsonResponse => {
+        return jsonResponse.id;
+      }).then(id => {
+        userId = id;
+        return 'https://api.spotify.com/	/v1/me/playlists';
+      }).then(urlString => {
+        fetch(urlString).then(response => {
+          if(response.ok){
+            return response.json();
+          } throw new Error('Request Failed.');
+        }, networkError => console.log(networkError.message)).then(jsonResponse => {
+          jsonResponse.forEach(playlist => {
+            if(playlist.name === 'SpotifyBPM'){
+              return playlist.id;
+            }
+          });
+        });    
+      
+      });
   }
-  getCodes();
+  
+
+  
+  function getUserPlaylist(){
+  
+
+    
+  }
+    
+    /*
+    fetch(playlistURL, 
+    {headers: {
+      'Authorization': 'Bearer ' + accessToken
+    }}).then(response => {
+      if(response.ok){
+        return response.json();
+      }
+      throw new Error('Request failed!');
+      }, networkError => console.log(networkError.message)
+      ).then(jsonResponse => {
+        //do something with repsonse
+        console.log(jsonResponse);
+
+
+    });
+    */
+  
+
+
+  getAccessToken();
+  
+  getUserPlaylist();
+
+  
+
+}
+
+  
 
     /*.then(jsonResponse => {
       console.log('auth code: ' + jsonResponse);
@@ -48,23 +126,19 @@ export function loginUser(){
       });
       
     });
-    */
+    
 }
-
+*/
   
-export function getUserPlaylist(){
-  fetch(playlistURL).then(response => {
-    if(response.ok){
-      return response.json();
-    }
-    throw new Error('Request failed!');
-    }, networkError => console.log(networkError.message)
-    ).then(jsonResponse => {
-      //do something with repsonse
-  });
 
 
+function randomState (length) {
+  var text = '';
+  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
 }
-
-
-
+  
