@@ -9,6 +9,13 @@ export class LoginArea extends Component {
 
   handleClick(e){
     SpotifyHandler();
+
+    /*
+    await getAccessToken();
+    let userId = await getUserId();
+    let userPlaylists = await getUserPlaylists();
+    await getSpotifyBPMPlaylistId(userPlaylists, userId);
+    */
   }
 
   render(){
