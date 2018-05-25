@@ -108,18 +108,22 @@ class App extends Component {
     this.setState({});
   }
 
+
   render() {
     return (
       <div className="App">
-        <h1 className="title">Spotify BPM Picker</h1>
-        <div className="header">
+        <h1 className="title headerGroup">Spotify BPM Picker</h1>
+        <div className="headerGroup headerText">
           This app will allow you to search for songs by BPM in your
           "SpotifyBPM" playlist, and add them to your "BPMWorkout" playlist.
         </div>
 
         <input
-          className="searchBar"
+          id= "searchbar"
+          type= "text"
+          className="searchBar headerGroup"
           placeholder="Search by BPM"
+          onFocus= {() => {document.getElementById('searchbar').placeholder = ''}}
           onChange={this.handleSearch}
         />
 

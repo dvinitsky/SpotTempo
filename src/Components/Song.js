@@ -14,17 +14,22 @@ class Song extends Component {
     return (
       <div
         onClick={this.handleSongClick}
-        className={
-          this.props.list === "searchResults" ? "searchItem" : "playlistItem"
+        className=  { 'song ' +
+          (this.props.list === "searchResults" ? "searchItem" : "playlistItem")
         }
       >
-        <div className='add-remove'>{this.props.list === "searchResults" ? "+" : "-"}</div>
+        <div className='add-remove'>
+          <div>{this.props.list === "searchResults" ? "+" : "-"}
+          </div>
+        </div>
 
         <div className="songInfo">
           <strong>
-            {this.props.song.name} by {this.props.song.artist} ({this.props.song.tempo}{" "}
-            BPM)
+            {this.props.song.name} by {this.props.song.album.artists[0].name}
           </strong>
+        </div>
+        <div className='bpm'>
+          {this.props.song.tempo}{" "}BPM
         </div>
       </div>
     );
