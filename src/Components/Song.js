@@ -18,7 +18,7 @@ class Song extends Component {
           this.props.list === "searchResults" ? "searchItem" : "playlistItem"
         }
       >
-        <div>{this.props.list === "searchResults" ? "+" : "-"}</div>
+        <div className='add-remove'>{this.props.list === "searchResults" ? "+" : "-"}</div>
 
         <div className="songInfo">
           <strong>

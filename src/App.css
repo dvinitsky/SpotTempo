@@ -60,5 +60,6 @@ html {margin: 0;padding: 0;}
   margin: 20px;
 }
 
-
-
+.add-remove {
+  text-align: center;
+}

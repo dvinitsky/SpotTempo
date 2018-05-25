@@ -58,18 +58,22 @@ class App extends Component {
       BPMplaylist[i].tempo = audioFeatures.audio_features[i].tempo.toFixed(1);
     }
 
-    this.setState({ BPMplaylist: BPMplaylist });
+    this.setState({ BPMplaylist: BPMplaylist, searchResults: BPMplaylist });
   }
 
   async handleSearch(e) {
-    let searchbpm = parseInt(e.target.value, 10);
     let matchingSongs = [];
 
-    for (let i = 0; i < this.state.BPMplaylist.length; i++) {
-      let currentSong = this.state.BPMplaylist[i];
+    if(e.target.value === ''){
+      matchingSongs = this.state.BPMplaylist;
+    } else{
+      let searchbpm = parseInt(e.target.value, 10);
+      for (let i = 0; i < this.state.BPMplaylist.length; i++) {
+        let currentSong = this.state.BPMplaylist[i];
 
-      if (currentSong.tempo > searchbpm - 10 && currentSong.tempo < searchbpm + 10) {
-        matchingSongs.push(currentSong);
+        if (currentSong.tempo > searchbpm - 10 && currentSong.tempo < searchbpm + 10) {
+          matchingSongs.push(currentSong);
+        }
       }
     }
 
