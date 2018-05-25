@@ -58,7 +58,6 @@ class App extends Component {
       BPMplaylist[i].tempo = audioFeatures.audio_features[i].tempo.toFixed(1);
     }
 
-    console.log(BPMplaylist);
     this.setState({ BPMplaylist: BPMplaylist });
   }
 
@@ -68,12 +67,9 @@ class App extends Component {
 
     for (let i = 0; i < this.state.BPMplaylist.length; i++) {
       let currentSong = this.state.BPMplaylist[i];
-      let songTempo = await SpotifyHandler.getTempo(currentSong.id);
 
-      currentSong.tempo = songTempo;
-
-      if (songTempo > searchbpm - 10 && songTempo < searchbpm + 10) {
-        matchingSongs.push({ song: currentSong });
+      if (currentSong.tempo > searchbpm - 10 && currentSong.tempo < searchbpm + 10) {
+        matchingSongs.push(currentSong);
       }
     }
 
@@ -83,20 +79,16 @@ class App extends Component {
   addSong(song) {
     this.state.playlist.push(song);
 
-    let searchResults = this.state.searchResults;
-    for (let i = 0; i < searchResults.length; i++) {
-      if (searchResults[i].id === song.id) {
-        searchResults.splice(i, 1);
+    function removeFromOtherList(list){
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].id === song.id) {
+          list.splice(i, 1);
+        }
       }
+      return list;
     }
 
-    let BPMplaylist = this.state.BPMplaylist;
-    for (let i = 0; i < BPMplaylist.length; i++) {
-      if (BPMplaylist[i].id === song.id) {
-        BPMplaylist.splice(i, 1);
-      }
-    }
-    this.setState({ BPMplaylist: BPMplaylist, searchResults: searchResults });
+    this.setState({ BPMplaylist: removeFromOtherList(this.state.BPMplaylist, song), searchResults: removeFromOtherList(this.state.searchResults, song) });
   }
 
   removeSong(song) {
@@ -108,6 +100,7 @@ class App extends Component {
       this.state.searchResults.push(song);
     }
     this.state.playlist.splice(this.state.playlist.indexOf(song), 1);
+    this.state.BPMplaylist.push(song);
     this.setState({});
   }
 
