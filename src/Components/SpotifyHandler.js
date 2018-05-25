@@ -1,6 +1,5 @@
 const clientId = "200fe6a2e65643b4bada24a59cebc2cb";
-//const clientSecret = 'c5082a4127ae4ae7b61dd87abe544784';
-const redirectUri = "http://localhost:3000/";
+const redirectUri = "http://spottempo.surge.sh/";
 
 let getRequestURL =
   "https://accounts.spotify.com/authorize?client_id=" +
