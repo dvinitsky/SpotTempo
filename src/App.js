@@ -12,9 +12,11 @@ class App extends Component {
     this.removeSong = this.removeSong.bind(this);
 
     this.state = {
-      BPMplaylist: [],
-      searchResults: [],
-      playlist: []
+      origin: [],
+      originId: "",
+      destination: [],
+      destinationId: "",
+      searchResults: []
     };
   }
 
@@ -24,18 +26,35 @@ class App extends Component {
     let userId = await SpotifyHandler.getUserId();
     this.setState({ userId: userId });
 
-    let userPlaylists = await SpotifyHandler.getUserPlaylists();
+    let userPlaylists;
+    while (this.state.originId === "") {
+      userPlaylists = await SpotifyHandler.getUserPlaylists();
 
-    let playlistId = SpotifyHandler.setSpotifyBPMPlaylistId(userPlaylists);
-    this.setState({ spotifyBPMPlaylistId: playlistId });
+      let playlistId = SpotifyHandler.setOriginId(userPlaylists);
+      this.setState({ originId: playlistId });
 
-    if (this.state.spotifyBPMPlaylistId === "") {
-      await SpotifyHandler.createPlaylist(userId);
+      //make sure there's a SpotTempo playlist
+      if (this.state.originId === "") {
+        alert('Please create a playlist named "SpotTempo"');
+      }
+    }
+
+    let destinationId;
+    let playlistExists = false;
+    for (let i = 0; i < userPlaylists.items.length; i++) {
+      if (userPlaylists.items[i].name === "SpotTempo Workout") {
+        destinationId = userPlaylists.items[i].id;
+        playlistExists = true;
+        break;
+      }
+    }
+    if (!playlistExists) {
+      destinationId = await SpotifyHandler.createPlaylist(userId);
     }
 
     let BPMplaylist = await SpotifyHandler.getBPMTracks(
       this.state.userId,
-      this.state.spotifyBPMPlaylistId
+      this.state.originId
     );
 
     BPMplaylist = BPMplaylist.map(song => {
@@ -52,26 +71,35 @@ class App extends Component {
     }
 
     /////returns an array of audio feature obects
-    let audioFeatures = await SpotifyHandler.getTempo(ids);
+    if (ids.length !== 0) {
+      let audioFeatures = await SpotifyHandler.getTempo(ids);
 
-    for (let i = 0; i < audioFeatures.audio_features.length; i++) {
-      BPMplaylist[i].tempo = audioFeatures.audio_features[i].tempo.toFixed(1);
+      for (let i = 0; i < audioFeatures.audio_features.length; i++) {
+        BPMplaylist[i].tempo = audioFeatures.audio_features[i].tempo.toFixed(1);
+      }
     }
 
-    this.setState({ BPMplaylist: BPMplaylist, searchResults: BPMplaylist });
+    this.setState({
+      origin: BPMplaylist,
+      searchResults: BPMplaylist,
+      destinationId: destinationId
+    });
   }
 
   async handleSearch(e) {
     let matchingSongs = [];
 
-    if(e.target.value === ''){
-      matchingSongs = this.state.BPMplaylist;
-    } else{
+    if (e.target.value === "") {
+      matchingSongs = this.state.origin;
+    } else {
       let searchbpm = parseInt(e.target.value, 10);
-      for (let i = 0; i < this.state.BPMplaylist.length; i++) {
-        let currentSong = this.state.BPMplaylist[i];
+      for (let i = 0; i < this.state.origin.length; i++) {
+        let currentSong = this.state.origin[i];
 
-        if (currentSong.tempo > searchbpm - 10 && currentSong.tempo < searchbpm + 10) {
+        if (
+          currentSong.tempo > searchbpm - 10 &&
+          currentSong.tempo < searchbpm + 10
+        ) {
           matchingSongs.push(currentSong);
         }
       }
@@ -80,10 +108,10 @@ class App extends Component {
     this.setState({ searchResults: matchingSongs });
   }
 
-  addSong(song) {
-    this.state.playlist.push(song);
+  async addSong(song) {
+    this.state.destination.push(song);
 
-    function removeFromOtherList(list){
+    function removeFromOtherList(list) {
       for (let i = 0; i < list.length; i++) {
         if (list[i].id === song.id) {
           list.splice(i, 1);
@@ -92,7 +120,17 @@ class App extends Component {
       return list;
     }
 
-    this.setState({ BPMplaylist: removeFromOtherList(this.state.BPMplaylist, song), searchResults: removeFromOtherList(this.state.searchResults, song) });
+    this.setState({
+      origin: removeFromOtherList(this.state.origin, song),
+      searchResults: removeFromOtherList(this.state.searchResults, song)
+    });
+
+    let res = await SpotifyHandler.addTrack(
+      this.state.userId,
+      this.state.destinationId,
+      song.uri
+    );
+    console.log(res);
   }
 
   removeSong(song) {
@@ -103,27 +141,28 @@ class App extends Component {
     if (song.tempo > bpm - 10 && song.tempo < bpm + 10) {
       this.state.searchResults.push(song);
     }
-    this.state.playlist.splice(this.state.playlist.indexOf(song), 1);
-    this.state.BPMplaylist.push(song);
+    this.state.destination.splice(this.state.destination.indexOf(song), 1);
+    this.state.origin.push(song);
     this.setState({});
   }
-
 
   render() {
     return (
       <div className="App">
         <h1 className="title headerGroup">Spotify BPM Picker</h1>
         <div className="headerGroup headerText">
-          This app will allow you to search for songs by BPM in your
-          "SpotifyBPM" playlist, and add them to your "BPMWorkout" playlist.
+          This app will allow you to search for songs by BPM in your "SpotTempo"
+          playlist, and add them to your "SpotTempo Workout" playlist.
         </div>
 
         <input
-          id= "searchbar"
-          type= "text"
+          id="searchbar"
+          type="text"
           className="searchBar headerGroup"
           placeholder="Search by BPM"
-          onFocus= {() => {document.getElementById('searchbar').placeholder = ''}}
+          onFocus={() => {
+            document.getElementById("searchbar").placeholder = "";
+          }}
           onChange={this.handleSearch}
         />
 
@@ -139,7 +178,7 @@ class App extends Component {
         <div className="playlistContainer">
           <div className="playlistHeader">Playlist</div>
           <SongList
-            songs={this.state.playlist}
+            songs={this.state.destination}
             shiftSong={this.removeSong}
             list="playlist"
           />
@@ -148,7 +187,7 @@ class App extends Component {
         <LoginArea
           onclick={this.handleLogin}
           userId={this.state.userId}
-          spotifyBPMPlaylistId={this.state.spotifyBPMPlaylistId}
+          originId={this.state.originId}
         />
       </div>
     );
@@ -164,7 +203,7 @@ const LoginArea = props => {
         Click here to log in with Spotify
       </button>
       <div>User ID: {props.userId}</div>
-      <div>Playlist ID: {props.spotifyBPMPlaylistId}</div>
+      <div>Playlist ID: {props.originId}</div>
     </div>
   );
 };

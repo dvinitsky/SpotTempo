@@ -64,11 +64,10 @@ export const SpotifyHandler = {
     }
   },
 
-  setSpotifyBPMPlaylistId: function(userPlaylists) {
+  setOriginId: function(userPlaylists) {
     let id = "";
-    //check if the playlist already exists
     userPlaylists.items.forEach(playlist => {
-      if (playlist.name === "SpotifyBPM") {
+      if (playlist.name === "SpotTempo") {
         id = playlist.id;
       }
     });
@@ -76,7 +75,6 @@ export const SpotifyHandler = {
   },
 
   createPlaylist: async function(userId) {
-    //if we're still in the function, we need to create a playlist named Spotify BPM
     try {
       let response = await fetch(
         "https://api.spotify.com/v1/users/" + userId + "/playlists",
@@ -87,7 +85,7 @@ export const SpotifyHandler = {
           },
           method: "POST",
           body: JSON.stringify({
-            name: "SpotifyBPM"
+            name: "SpotTempo Workout"
           })
         }
       );
@@ -102,13 +100,13 @@ export const SpotifyHandler = {
     }
   },
 
-  getBPMTracks: async function(userId, spotifyBPMPlaylistId) {
+  getBPMTracks: async function(userId, originId) {
     try {
       let response = await fetch(
         "https://api.spotify.com/v1/users/" +
           userId +
           "/playlists/" +
-          spotifyBPMPlaylistId +
+          originId +
           "/tracks",
         { headers: { Authorization: "Bearer " + accessToken } }
       );
@@ -128,6 +126,28 @@ export const SpotifyHandler = {
         "https://api.spotify.com/v1/audio-features/?ids=" + trackIds,
         { headers: { Authorization: "Bearer " + accessToken } }
       );
+      if (response.ok) {
+        let res = await response.json();
+        return res;
+      }
+      throw new Error("Request Failed!");
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  addTrack: async function(userId, destinationId, trackId) {
+    try {
+      let url =
+        "https://api.spotify.com/v1/users/" +
+        userId +
+        "/playlists/" +
+        destinationId +
+        "/tracks?uris=" +
+        trackId;
+      console.log(url);
+      let response = await fetch(url, {
+        headers: { Authorization: "Bearer " + accessToken }
+      });
       if (response.ok) {
         let res = await response.json();
         return res;
