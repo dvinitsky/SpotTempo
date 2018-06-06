@@ -100,13 +100,13 @@ export const SpotifyHandler = {
     }
   },
 
-  getBPMTracks: async function(userId, originId) {
+  getPlaylistTracks: async function(userId, playlistId) {
     try {
       let response = await fetch(
         "https://api.spotify.com/v1/users/" +
           userId +
           "/playlists/" +
-          originId +
+          playlistId +
           "/tracks",
         { headers: { Authorization: "Bearer " + accessToken } }
       );
@@ -146,7 +146,8 @@ export const SpotifyHandler = {
         trackId;
       console.log(url);
       let response = await fetch(url, {
-        headers: { Authorization: "Bearer " + accessToken }
+        headers: { Authorization: "Bearer " + accessToken },
+        method: "POST"
       });
       if (response.ok) {
         let res = await response.json();

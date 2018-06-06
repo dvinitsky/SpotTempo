@@ -52,20 +52,21 @@ class App extends Component {
       destinationId = await SpotifyHandler.createPlaylist(userId);
     }
 
-    let BPMplaylist = await SpotifyHandler.getBPMTracks(
+    //fetch BPM information
+    let bpmList = await SpotifyHandler.getPlaylistTracks(
       this.state.userId,
       this.state.originId
     );
 
-    BPMplaylist = BPMplaylist.map(song => {
+    bpmList = bpmList.map(song => {
       return song.track;
     });
 
     let ids = "";
 
-    for (let i = 0; i < BPMplaylist.length; i++) {
-      ids += BPMplaylist[i].id;
-      if (i !== BPMplaylist.length - 1) {
+    for (let i = 0; i < bpmList.length; i++) {
+      ids += bpmList[i].id;
+      if (i !== bpmList.length - 1) {
         ids += ",";
       }
     }
@@ -75,14 +76,25 @@ class App extends Component {
       let audioFeatures = await SpotifyHandler.getTempo(ids);
 
       for (let i = 0; i < audioFeatures.audio_features.length; i++) {
-        BPMplaylist[i].tempo = audioFeatures.audio_features[i].tempo.toFixed(1);
+        bpmList[i].tempo = audioFeatures.audio_features[i].tempo.toFixed(1);
       }
     }
 
+    //get existing SpotTempo Workout songs
+    let destination = await SpotifyHandler.getPlaylistTracks(
+      this.state.userId,
+      destinationId
+    );
+    destination = destination.map(song => {
+      return song.track;
+    });
+    console.log(destination);
+
     this.setState({
-      origin: BPMplaylist,
-      searchResults: BPMplaylist,
-      destinationId: destinationId
+      origin: bpmList,
+      searchResults: bpmList,
+      destinationId: destinationId,
+      destination: destination
     });
   }
 
@@ -125,12 +137,11 @@ class App extends Component {
       searchResults: removeFromOtherList(this.state.searchResults, song)
     });
 
-    let res = await SpotifyHandler.addTrack(
+    await SpotifyHandler.addTrack(
       this.state.userId,
       this.state.destinationId,
       song.uri
     );
-    console.log(res);
   }
 
   removeSong(song) {
