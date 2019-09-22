@@ -3,16 +3,18 @@
   --song-element-padding: 10px;
 }
 
-html {margin: 0;padding: 0;}
-
+html {
+  margin: 0;
+  padding: 0;
+}
 
 .App {
   display: grid;
   grid-template-columns: repeat(14, 1fr);
-  grid-template-rows: repeat(12, 50px); 
+  grid-template-rows: repeat(12, 50px);
 }
 
-.headerGroup{
+.headerGroup {
   grid-column: 5 / 10;
   text-align: center;
 }
@@ -29,12 +31,13 @@ html {margin: 0;padding: 0;}
 
 .searchBar {
   grid-column: 6 / 9;
-  grid-row: 5 / 6 ;
+  grid-row: 5 / 6;
   margin: 0 30px;
   font-size: 24px;
 }
 
-.searchResultsHeader, .playlistHeader {
+.searchResultsHeader,
+.playlistHeader {
   text-align: center;
   font-size: 20px;
 }
@@ -42,22 +45,20 @@ html {margin: 0;padding: 0;}
 /* Search Results */
 .searchResultsContainer {
   grid-column: 3 / 7;
-  grid-row: 7 / 8 ;
-  
+  grid-row: 7 / 8;
 }
-.searchItem {
+.song.searchResults {
   background-color: #f0eeb7;
 }
 
 /* Playlist */
 .playlistContainer {
   grid-column: 8 / 12;
-  grid-row: 7 / 8 ;
+  grid-row: 7 / 8;
 }
-.playlistItem {
+.song.playlist {
   background-color: #c8e2ee;
 }
-
 
 /* Song Item */
 .song {

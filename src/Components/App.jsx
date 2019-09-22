@@ -1,48 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
+import Login from "./Login";
 import { SongList } from "./SongList";
-import { addTrack } from "../helpers/spotify";
-import { LoginArea } from "./Login";
-import { login } from "../helpers/login-helpers";
-import { getMatchingTracks } from "../helpers/search-helpers";
+import {
+  getAccessTokenAndExpirationSeconds,
+  getMatchingTracks
+} from "../helpers/helpers";
+import { redirectUri, clientId } from "../constants/constants";
+import { SpotifyService } from "../services/SpotifyService";
 
 const App = () => {
-  const [userId, setUserId] = useState("");
-  const [originPlaylistId, setOriginPlaylistId] = useState("");
+  const [accessToken, setAccessToken] = useState();
   const [originPlaylistTracks, setOriginPlaylistTracks] = useState([]);
-  const [destinationPlaylistId, setDestinationPlaylistId] = useState("");
   const [destinationPlaylistTracks, setDestinationPlaylistTracks] = useState(
     []
   );
   const [searchResults, setSearchResults] = useState([]);
+  const [Spotify, setSpotify] = useState();
 
-  const handleLogin = async () => {
+  useEffect(() => {
     const {
-      userId,
-      originPlaylistId,
-      originPlaylistTracks,
-      destinationPlaylistId,
-      destinationPlaylistTracks
-    } = await login();
+      accessToken: at = "",
+      expirationSeconds = 0
+    } = getAccessTokenAndExpirationSeconds();
 
-    setUserId(userId);
-    setOriginPlaylistId(originPlaylistId);
-    setOriginPlaylistTracks(originPlaylistTracks);
-    setDestinationPlaylistId(destinationPlaylistId);
-    setDestinationPlaylistTracks(destinationPlaylistTracks);
-  };
+    setAccessToken(at);
+    setSpotify(new SpotifyService(at));
+
+    window.setTimeout(() => setAccessToken(), expirationSeconds * 1000);
+  }, [setAccessToken]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const allData = await Spotify.getAllData();
+
+      setOriginPlaylistTracks(allData.originPlaylistTracks);
+      setDestinationPlaylistTracks(allData.destinationPlaylistTracks);
+      setSearchResults(allData.originPlaylistTracks);
+    };
+
+    Spotify && fetchData();
+  }, [Spotify]);
 
   const handleSearch = async e =>
-    setSearchResults(await getMatchingTracks(e.target.value));
+    setSearchResults(
+      await getMatchingTracks(e.target.value, originPlaylistTracks)
+    );
 
   const addSongToDestination = async song => {
     setDestinationPlaylistTracks([...destinationPlaylistTracks, song]);
-    setOriginPlaylistTracks([
+    setOriginPlaylistTracks(
       originPlaylistTracks.filter(item => item.id !== song.id)
-    ]);
-    setSearchResults([searchResults.filter(item => item.id !== song.id)]);
+    );
+    setSearchResults(searchResults.filter(item => item.id !== song.id));
 
-    await addTrack(userId, destinationPlaylistId, song.uri);
+    console.log();
+    await Spotify.addTrack(song.uri);
   };
 
   const removeSongFromDestination = song => {
@@ -57,7 +70,11 @@ const App = () => {
     }
   };
 
-  return (
+  const handleLogin = () => {
+    window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}&scope=playlist-read-private%20playlist-modify-private%20playlist-modify-public`;
+  };
+
+  return accessToken ? (
     <div className="App">
       <h1 className="title headerGroup">Spotify BPM Picker</h1>
       <div className="headerGroup headerText">
@@ -76,30 +93,22 @@ const App = () => {
         onChange={handleSearch}
       />
 
-      <div className="searchResultsContainer">
-        <div className="searchResultsHeader">Search Results</div>
-        <SongList
-          songs={searchResults}
-          shiftSong={addSongToDestination}
-          list="searchResults"
-        />
-      </div>
+      <SongList
+        label="Search Results"
+        songs={searchResults}
+        shiftSong={addSongToDestination}
+        listName="searchResults"
+      />
 
-      <div className="playlistContainer">
-        <div className="playlistHeader">Playlist</div>
-        <SongList
-          songs={destinationPlaylistTracks}
-          shiftSong={removeSongFromDestination}
-          list="playlist"
-        />
-      </div>
-
-      <LoginArea
-        onclick={handleLogin}
-        userId={userId}
-        originId={originPlaylistId}
+      <SongList
+        label="Playlist"
+        songs={destinationPlaylistTracks}
+        shiftSong={removeSongFromDestination}
+        listName="playlist"
       />
     </div>
+  ) : (
+    <Login onclick={handleLogin} />
   );
 };
 export default App;
