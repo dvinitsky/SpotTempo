@@ -13,9 +13,9 @@ export const SongList = ({ label, shiftSong, listName, songs }) => (
       Search Results
     </div>
     <div className={listName}>
-      {songs.map(song => (
+      {songs.map((song, index) => (
         <Song
-          key={song.id}
+          key={index}
           song={song}
           shiftSong={shiftSong}
           listName={listName}

@@ -24,23 +24,22 @@ const App = () => {
       expirationSeconds = 0
     } = getAccessTokenAndExpirationSeconds();
 
-    setAccessToken(at);
-    setSpotify(new SpotifyService(at));
+    if (at) {
+      setAccessToken(at);
+      const Spotify = new SpotifyService(at);
 
-    window.setTimeout(() => setAccessToken(), expirationSeconds * 1000);
+      (async () => {
+        const allData = await Spotify.getAllData();
+
+        setOriginPlaylistTracks(allData.originPlaylistTracks);
+        setDestinationPlaylistTracks(allData.destinationPlaylistTracks);
+        setSearchResults(allData.originPlaylistTracks);
+      })();
+
+      setSpotify(Spotify);
+      window.setTimeout(() => setAccessToken(), expirationSeconds * 1000);
+    }
   }, [setAccessToken]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const allData = await Spotify.getAllData();
-
-      setOriginPlaylistTracks(allData.originPlaylistTracks);
-      setDestinationPlaylistTracks(allData.destinationPlaylistTracks);
-      setSearchResults(allData.originPlaylistTracks);
-    };
-
-    Spotify && fetchData();
-  }, [Spotify]);
 
   const handleSearch = async e =>
     setSearchResults(
@@ -54,7 +53,6 @@ const App = () => {
     );
     setSearchResults(searchResults.filter(item => item.id !== song.id));
 
-    console.log();
     await Spotify.addTrack(song.uri);
   };
 
