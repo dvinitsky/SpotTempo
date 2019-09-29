@@ -1,28 +1,19 @@
 import React from "react";
 import Song from "./Song";
+import styled from "styled-components";
+
+const Header = styled.div`
+  text-align: center;
+  font-size: 20px;
+`;
 
 export const SongList = ({ label, shiftSong, listName, songs }) => (
-  <div
-    className={`${
-      label === "Playlist" ? "playlist" : "searchResults"
-    }Container`}
-  >
-    <div
-      className={`${label === "Playlist" ? "playlist" : "searchResults"}Header`}
-    >
-      Search Results
-    </div>
-    <div className={listName}>
-      {songs.map((song, index) => (
-        <Song
-          key={index}
-          song={song}
-          shiftSong={shiftSong}
-          listName={listName}
-        />
-      ))}
-    </div>
-  </div>
+  <>
+    <Header>{label}</Header>
+    {songs.map((song, index) => (
+      <Song key={index} song={song} shiftSong={shiftSong} listName={listName} />
+    ))}
+  </>
 );
 
 export default SongList;
