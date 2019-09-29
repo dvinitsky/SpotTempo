@@ -8,12 +8,12 @@ const Header = styled.div`
 `;
 
 export const SongList = ({ label, shiftSong, listName, songs }) => (
-  <>
+  <div>
     <Header>{label}</Header>
     {songs.map((song, index) => (
       <Song key={index} song={song} shiftSong={shiftSong} listName={listName} />
     ))}
-  </>
+  </div>
 );
 
 export default SongList;

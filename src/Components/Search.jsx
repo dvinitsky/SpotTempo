@@ -4,16 +4,31 @@ import styled from "styled-components";
 import { SpotifyService } from "../services/SpotifyService";
 import { getMatchingTracks } from "../helpers/helpers";
 
-const Title = styled.h1`
-  text-align: center;
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+const Title = styled.div`
+  font-size: 25px;
 `;
 const HeaderText = styled.div`
   text-align: center;
   color: white;
+  margin: 20px 60px;
 `;
 const SearchBar = styled.input`
-  margin: 0 30px;
   font-size: 24px;
+  margin-right: 20px;
+`;
+const SearchArea = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+`;
+const ListsContainer = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const Search = ({ accessToken }) => {
@@ -30,6 +45,8 @@ const Search = ({ accessToken }) => {
     (async () => {
       const allData = await Spotify.getAllData();
 
+      console.log(allData.originPlaylistTracks);
+      console.log(allData.destinationPlaylistTracks);
       setOriginPlaylistTracks(allData.originPlaylistTracks);
       setDestinationPlaylistTracks(allData.destinationPlaylistTracks);
       setSearchResults(allData.originPlaylistTracks);
@@ -66,30 +83,34 @@ const Search = ({ accessToken }) => {
   };
 
   return (
-    <>
+    <Wrapper>
       <Title>Spotify BPM Picker</Title>
       <HeaderText>
         This app will allow you to search for songs by BPM in your "SpotTempo"
         playlist, and add them to your "SpotTempo Workout" playlist.
       </HeaderText>
 
-      <SearchBar id="searchbar" type="text" />
-      <button onClick={handleSearch}>Search</button>
+      <SearchArea>
+        <SearchBar id="searchbar" type="text" />
+        <button onClick={handleSearch}>Search</button>
+      </SearchArea>
 
-      <SongList
-        label="Search Results"
-        songs={searchResults}
-        shiftSong={addSongToDestination}
-        listName="searchResults"
-      />
+      <ListsContainer>
+        <SongList
+          label="Search Results"
+          songs={searchResults}
+          shiftSong={addSongToDestination}
+          listName="searchResults"
+        />
 
-      <SongList
-        label="Playlist"
-        songs={destinationPlaylistTracks}
-        shiftSong={removeSongFromDestination}
-        listName="playlist"
-      />
-    </>
+        <SongList
+          label="Playlist"
+          songs={destinationPlaylistTracks}
+          shiftSong={removeSongFromDestination}
+          listName="playlist"
+        />
+      </ListsContainer>
+    </Wrapper>
   );
 };
 export default Search;
