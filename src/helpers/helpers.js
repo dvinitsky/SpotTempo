@@ -1,9 +1,14 @@
-export const getMatchingTracks = async (bpm, originPlaylistTracks) => {
+export const getMatchingTracks = (bpm, originPlaylistTracks) => {
   if (!bpm) return originPlaylistTracks;
 
-  return originPlaylistTracks.filter(
-    track => track.tempo > bpm - 10 && track.tempo < bpm + 10
-  );
+  console.log("bpm is", bpm);
+
+  const mathcingTracks = originPlaylistTracks.filter(track => {
+    console.log(track.name, "has a tempo of", track.tempo);
+    return track.tempo > bpm - 10 && track.tempo < bpm + 10;
+  });
+
+  console.log(mathcingTracks);
 };
 
 export const getAccessTokenAndExpirationSeconds = () => {

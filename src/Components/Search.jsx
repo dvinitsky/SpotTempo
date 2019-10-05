@@ -38,6 +38,7 @@ const Search = ({ accessToken }) => {
   );
   const [searchResults, setSearchResults] = useState([]);
   const [Spotify, setSpotify] = useState();
+  const [bpm, setBpm] = useState();
 
   useEffect(() => {
     const Spotify = new SpotifyService(accessToken);
@@ -45,8 +46,6 @@ const Search = ({ accessToken }) => {
     (async () => {
       const allData = await Spotify.getAllData();
 
-      console.log(allData.originPlaylistTracks);
-      console.log(allData.destinationPlaylistTracks);
       setOriginPlaylistTracks(allData.originPlaylistTracks);
       setDestinationPlaylistTracks(allData.destinationPlaylistTracks);
       setSearchResults(allData.originPlaylistTracks);
@@ -55,10 +54,11 @@ const Search = ({ accessToken }) => {
     setSpotify(Spotify);
   }, [accessToken, setSpotify]);
 
-  const handleSearch = async e =>
-    setSearchResults(
-      await getMatchingTracks(e.target.value, originPlaylistTracks)
-    );
+  const handleSearch = () => {
+    const newBpm = document.getElementById("searchbar").value;
+    setBpm(newBpm);
+    setSearchResults(getMatchingTracks(newBpm, originPlaylistTracks));
+  };
 
   const addSongToDestination = async song => {
     setDestinationPlaylistTracks([...destinationPlaylistTracks, song]);
@@ -76,7 +76,7 @@ const Search = ({ accessToken }) => {
       destinationPlaylistTracks.filter(track => track.id !== song.id)
     );
 
-    const bpm = document.getElementsByClassName("searchBar")[0].value;
+    const bpm = document.getElementById("searchbar").value;
     if (song.tempo > bpm - 10 && song.tempo < bpm + 10) {
       setSearchResults([...searchResults, song]);
     }

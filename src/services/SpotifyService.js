@@ -11,11 +11,7 @@ export class SpotifyService {
     this.userId = await this.getUserId();
     const userPlaylists = await this.getUserPlaylists();
 
-    const originPlaylistId = await this.getPlaylistId(
-      "SpotTempo",
-      userPlaylists
-    );
-    const originPlaylistTracks = await this.getPlaylistTracks(originPlaylistId);
+    const originPlaylistTracks = await this.getLikedSongs();
 
     this.destinationPlaylistId = await this.getPlaylistId(
       "SpotTempo Workout",
@@ -25,12 +21,27 @@ export class SpotifyService {
       this.destinationPlaylistId
     );
 
-    const trackIds = originPlaylistTracks.map(track => track.id).join(",");
+    const originTrackIds = originPlaylistTracks
+      .map(track => track.id)
+      .join(",");
+    const destinationTrackIds = destinationPlaylistTracks
+      .map(track => track.id)
+      .join(",");
 
-    let audioFeatures = await this.getTempo(trackIds);
-    audioFeatures.forEach(
+    let originAudioFeatures = await this.getTempo(originTrackIds);
+    originAudioFeatures.forEach(
       (item, index) =>
         (originPlaylistTracks[index].tempo = Math.round(item.tempo))
+    );
+
+    let destinationAudioFeatures = [];
+    if (destinationTrackIds.length > 0) {
+      destinationAudioFeatures = await this.getTempo(destinationTrackIds);
+    }
+
+    destinationAudioFeatures.forEach(
+      (item, index) =>
+        (destinationPlaylistTracks[index].tempo = Math.round(item.tempo))
     );
 
     return {
@@ -62,6 +73,21 @@ export class SpotifyService {
       if (response.ok) {
         const res = await response.json();
         return res.items;
+      }
+      throw new Error("Request failed!");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  getLikedSongs = async () => {
+    try {
+      let response = await fetch("https://api.spotify.com/v1/me/tracks", {
+        headers: this.headers
+      });
+      if (response.ok) {
+        const res = await response.json();
+        return res.items.map(item => item.track);
       }
       throw new Error("Request failed!");
     } catch (error) {
